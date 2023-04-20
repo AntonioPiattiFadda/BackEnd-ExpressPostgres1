@@ -30,7 +30,11 @@ if (config.env) {
 }
 
 // La clase sequalize obtiene dos parametros, la URI de conexion y un objeto que contiene la informacion sobre como hacer la conexion.
-const sequelize = new Sequelize(URI, options);
+const sequelize = new Sequelize(
+  `postgresql://postgres:IlFITQwqgCEzG2H0hlHR@containers-us-west-118.railway.app:7253/railway
+`,
+  options
+);
 
 setupModels(sequelize);
 //Desopues de hacer le setup le voy a pedir que haga una sincronizacion.
