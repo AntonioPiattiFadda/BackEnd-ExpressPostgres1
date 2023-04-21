@@ -1,13 +1,12 @@
 module.exports = {
-   // Le decimos la configuracion de la conexion.
+  // Le decimos la configuracion de la conexion.
   // Las migraciones necesitan su propia conexion, independientemente de la conexion qu etenga la aplicacion.
   // La conexion del migrador va opr terminal.
-  'config': './db/config.js',
+  config: "./api/db/config.js",
   //Donde buscar los modelos.
-  'models-path': './db/models/',
+  "models-path": "./api/db/models/",
   // DOnde encontrar las migraciones
-  'migrations-path': './db/migrations/',
+  "migrations-path": "./api/db/migrations/",
   // Semillas de informacion es para pruebas unitarioas o cargas masivas de datos a la vez.
-  'seeders-path': './db/seeders/',
-}
-
+  "seeders-path": "./api/db/seeders/",
+};

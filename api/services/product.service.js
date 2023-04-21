@@ -1,17 +1,17 @@
 const faker = require('faker');
 const boom = require('@hapi/boom');
-const { Op } = require('sequelize')
+const { Op } = require('sequelize');
 
-const { models } = require('../libs/sequelize')
-
-
+const { models } = require('../libs/sequelize');
+const pool = require('../libs/postgres.pool');
 
 class ProductsService {
-
-  constructor(){
+  constructor() {
     this.products = [];
     this.generate();
-
+    //Coneccion con pool
+    this.pool = pool;
+    this.pool.on('error', (error) => console.error(error));
   }
 
   generate() {
@@ -32,39 +32,39 @@ class ProductsService {
     return newProduct;
   }
 
-  async find(query) {
-    const options = {
-      include: ['category'],
-      where: {}
-    }
-    const { limit, offset } = query;
-    if (limit && offset) {
-      options.limit = limit,
-      options.offset = offset
-    }
-    const { price } = query;
-    if (price) {
-      //Ver bien porque pongo 2 prices.
-      options.where.price = price
-    }
-    const { price_min, price_max } = query;
-    if (price_min && price_max) {
-      options.where.price = {
-        [Op.gte]: price_min,
-        [Op.lte]: price_max
-      }
-    }
+  async find() {
+    // const options = {
+    //   include: ['category'],
+    //   where: {},
+    // };
+    // const { limit, offset } = query;
+    // if (limit && offset) {
+    //   (options.limit = limit), (options.offset = offset);
+    // }
+    // const { price } = query;
+    // if (price) {
+    //   //Ver bien porque pongo 2 prices.
+    //   options.where.price = price;
+    // }
+    // const { price_min, price_max } = query;
+    // if (price_min && price_max) {
+    //   options.where.price = {
+    //     [Op.gte]: price_min,
+    //     [Op.lte]: price_max,
+    //   };
+    // }
 
-    /* Eliminamos lo que usabamos antes
-    const query = 'SELECT * FROM tasks';
+    // const products = models.Product.findAll(options);
+    // return products;
+
+    const query = 'SELECT * FROM products';
     const rta = await this.pool.query(query);
-    return rta.rows;*/
-    const products = models.Product.findAll(options);
-    return products;
+    return rta.rows;
   }
 
   async findOne(id) {
-    const product = await models.Product.findByPk()
+    let asdf = id;
+    const product = await models.Product.findByPk();
     return product;
     if (!product) {
       throw boom.notFound('product not found');
@@ -76,27 +76,26 @@ class ProductsService {
   }
 
   async update(id, changes) {
-    const index = this.products.findIndex(item => item.id === id);
+    const index = this.products.findIndex((item) => item.id === id);
     if (index === -1) {
       throw boom.notFound('product not found');
     }
     const product = this.products[index];
     this.products[index] = {
       ...product,
-      ...changes
+      ...changes,
     };
     return this.products[index];
   }
 
   async delete(id) {
-    const index = this.products.findIndex(item => item.id === id);
+    const index = this.products.findIndex((item) => item.id === id);
     if (index === -1) {
       throw boom.notFound('product not found');
     }
     this.products.splice(index, 1);
     return { id };
   }
-
 }
 
 module.exports = ProductsService;
