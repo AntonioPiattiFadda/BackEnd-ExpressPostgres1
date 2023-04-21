@@ -31,6 +31,9 @@ if (config.env) {
 }
 
 // Ahora le pasasmos a pool un atribuo que reconoce que es connection String y la URi que construimos.
-const pool = new Pool({ connectionString: URI });
+const pool = new Pool({
+  connectionString: `postgresql://postgres:IlFITQwqgCEzG2H0hlHR@containers-us-west-118.railway.app:7253/railway
+`,
+});
 
 module.exports = pool;
