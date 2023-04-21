@@ -32,7 +32,7 @@ class ProductsService {
     return newProduct;
   }
 
-  async find() {
+  async find(q) {
     // const options = {
     //   include: ['category'],
     //   where: {},

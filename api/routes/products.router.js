@@ -8,7 +8,7 @@ const router = express.Router();
 const service = new ProductsService();
 
 router.get('/',
-  validatorHandler(queryProductSchema, 'query'),
+ // validatorHandler(queryProductSchema, 'query'),
   async (req, res, next) => {
     try {
       const products = await service.find(req.query);
