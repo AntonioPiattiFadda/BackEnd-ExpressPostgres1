@@ -1,71 +1,37 @@
-const faker = require('faker');
 const boom = require('@hapi/boom');
-const { Op } = require('sequelize');
-
-const { models } = require('../libs/sequelize');
 const pool = require('../libs/postgres.pool');
 
 class ProductsService {
   constructor() {
     this.products = [];
-    this.generate();
-    //Coneccion con pool
     this.pool = pool;
     this.pool.on('error', (error) => console.error(error));
   }
 
-  generate() {
-    const limit = 100;
-    for (let index = 0; index < limit; index++) {
-      this.products.push({
-        id: faker.datatype.uuid(),
-        name: faker.commerce.productName(),
-        price: parseInt(faker.commerce.price(), 10),
-        image: faker.image.imageUrl(),
-        isBlock: faker.datatype.boolean(),
-      });
-    }
-  }
-
   async create(data) {
-    const newProduct = await models.Product.create(data);
-    return newProduct;
+    const query =
+      'INSERT INTO products (name, price, description, image, category_id, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *';
+    const rta = await this.pool.query(query, [
+      data.name,
+      data.price,
+      data.description,
+      data.image,
+      data.categoryId,
+    ]);
+    return rta.rows[0];
   }
 
-  async find(q) {
-    // const options = {
-    //   include: ['category'],
-    //   where: {},
-    // };
-    // const { limit, offset } = query;
-    // if (limit && offset) {
-    //   (options.limit = limit), (options.offset = offset);
-    // }
-    // const { price } = query;
-    // if (price) {
-    //   //Ver bien porque pongo 2 prices.
-    //   options.where.price = price;
-    // }
-    // const { price_min, price_max } = query;
-    // if (price_min && price_max) {
-    //   options.where.price = {
-    //     [Op.gte]: price_min,
-    //     [Op.lte]: price_max,
-    //   };
-    // }
-
-    // const products = models.Product.findAll(options);
-    // return products;
-
+  async find() {
+    // Agregar el query para ver si le pongo limit y offset o price min y max
     const query = 'SELECT * FROM products';
     const rta = await this.pool.query(query);
     return rta.rows;
   }
 
   async findOne(id) {
-    let asdf = id;
-    const product = await models.Product.findByPk();
-    return product;
+    const query = 'SELECT * FROM products WHERE id = $1';
+    const rta = await this.pool.query(query, [id]);
+    const product = rta.rows[0];
     if (!product) {
       throw boom.notFound('product not found');
     }
@@ -76,26 +42,35 @@ class ProductsService {
   }
 
   async update(id, changes) {
-    const index = this.products.findIndex((item) => item.id === id);
-    if (index === -1) {
+    let columns = '';
+    let values = [];
+    // Se recorre el objeto de cambios para construir la cadena de actualización
+    // y los valores que se van a pasar a la consulta
+    Object.keys(changes).forEach((key, index) => {
+      columns += `${key} = $${index + 1}, `;
+      values.push(changes[key]);
+    });
+    // Se quita la última coma y espacio que sobran de la cadena de actualización
+    columns = columns.slice(0, -2);
+    // Se agrega el ID del producto a actualizar al final del array de valores
+    values.push(id);
+    const query = `UPDATE products SET ${columns} WHERE id = $${values.length} RETURNING *`;
+    const rta = await this.pool.query(query, values);
+    if (rta.rowCount === 0) {
       throw boom.notFound('product not found');
     }
-    const product = this.products[index];
-    this.products[index] = {
-      ...product,
-      ...changes,
-    };
-    return this.products[index];
+    return rta.rows[0];
   }
 
   async delete(id) {
-    const index = this.products.findIndex((item) => item.id === id);
-    if (index === -1) {
+    const query = 'DELETE FROM products WHERE id = $1 RETURNING *';
+    const rta = await this.pool.query(query, [id]);
+    if (rta.rowCount === 0) {
       throw boom.notFound('product not found');
     }
-    this.products.splice(index, 1);
-    return { id };
+    return rta.rows[0];
   }
+
 }
 
 module.exports = ProductsService;
