@@ -12,8 +12,7 @@ if (config.isProd) {
 }
 
 const pool = new Pool({
-  connectionString: `postgresql://postgres:IlFITQwqgCEzG2H0hlHR@containers-us-west-118.railway.app:7253/railway
-  `,
+  connectionString: `postgresql://postgres:RgjUZkeH2j66bzKqCOLv@containers-us-west-85.railway.app:7682/railway`,
 });
 
 module.exports = pool;
